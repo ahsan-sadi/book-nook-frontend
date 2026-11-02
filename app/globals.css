@@ -1,0 +1,286 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   BookNook — "The Reading Room" design tokens (shadcn/ui)
+   Palette: library-lamp forest green, brass, warm paper.
+   ============================================================ */
+:root {
+  --background: #f7f6f1;
+  --foreground: #16211c;
+  --card: #fffefb;
+  --card-foreground: #16211c;
+  --popover: #fffefb;
+  --popover-foreground: #16211c;
+  --primary: #1c4b3d;
+  --primary-foreground: #f6f7f2;
+  --secondary: #a97f22;
+  --secondary-foreground: #1e1604;
+  --muted: #eeece3;
+  --muted-foreground: #5f6a63;
+  --accent: #e9ece4;
+  --accent-foreground: #16211c;
+  --destructive: #b23a25;
+  --destructive-foreground: #fffefb;
+  --border: #e3e0d4;
+  --input: #d8d4c6;
+  --ring: #1c4b3d;
+  --radius: 0.75rem;
+
+  /* Brand-only surfaces used for the dark editorial panels */
+  --ink: #14201a;
+  --paper: #f4f1e7;
+
+  --chart-1: #1c4b3d;
+  --chart-2: #a97f22;
+  --chart-3: #2d6a8f;
+  --chart-4: #7a9e7e;
+  --chart-5: #8c5a3c;
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: #0e1512;
+  --foreground: #e7ede7;
+  --card: #131c18;
+  --card-foreground: #e7ede7;
+  --popover: #151f1a;
+  --popover-foreground: #e7ede7;
+  --primary: #6cbfa1;
+  --primary-foreground: #06130e;
+  --secondary: #d9ae59;
+  --secondary-foreground: #1e1604;
+  --muted: #1a251f;
+  --muted-foreground: #9aa79e;
+  --accent: #1d2823;
+  --accent-foreground: #e7ede7;
+  --destructive: #ef7a63;
+  --destructive-foreground: #0f0a08;
+  --border: #24312b;
+  --input: #2c3a33;
+  --ring: #6cbfa1;
+
+  --ink: #0b110e;
+  --paper: #e9efe9;
+
+  --chart-1: #6cbfa1;
+  --chart-2: #d9ae59;
+  --chart-3: #6bb0d6;
+  --chart-4: #9dc3a2;
+  --chart-5: #d39a76;
+
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@theme {
+  --font-display: var(--font-young-serif), Georgia, serif;
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* Slim, theme-aware scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--foreground) 25%, transparent);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
+    background-clip: content-box;
+  }
+}
+
+/* ============ Design system: "The Reading Room" ============ */
+@layer components {
+  /* Micro-label above section headings */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[0.7rem] font-bold uppercase;
+    letter-spacing: 0.28em;
+    color: var(--secondary);
+  }
+  .eyebrow::before {
+    content: "";
+    @apply inline-block h-px w-8;
+    background: currentColor;
+    opacity: 0.6;
+  }
+  /* Editorial display headings */
+  .display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+  }
+  .text-gradient {
+    background: linear-gradient(120deg, var(--secondary), color-mix(in oklab, var(--secondary) 45%, var(--chart-3)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Hover lift for cards / covers */
+  .lift {
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+  }
+  .lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 56px -28px rgb(0 0 0 / 0.4);
+  }
+  /* Paper-grain overlay (award-site texture) */
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  /* Category / filter pill (links look like chips) */
+  .chip {
+    @apply inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium;
+    border-color: var(--border);
+    transition: all 0.25s ease;
+  }
+  .chip:hover {
+    border-color: var(--secondary);
+    color: var(--secondary);
+  }
+  .chip-active,
+  .chip-active:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+  .chip-active:hover {
+    filter: brightness(1.08);
+  }
+  /* Shared page furniture */
+  .container-page { width: min(100% - 2rem, 72rem); margin-inline: auto; }
+  .section-title { font-family: var(--font-display); font-size: clamp(1.75rem, 3vw, 2.25rem); line-height: 1.15; }
+  .section-sub { max-width: 60ch; opacity: 0.75; }
+  .book-cover { aspect-ratio: 3 / 4; width: 100%; object-fit: cover; }
+  /* Empty states — one voice across every page */
+  .empty-state {
+    @apply flex flex-col items-center rounded-2xl border border-dashed px-8 py-14 text-center;
+    border-color: var(--border);
+    background: color-mix(in oklab, var(--card) 60%, transparent);
+  }
+}
+
+/* Swiper theming */
+.swiper-pagination-bullet-active { background: var(--secondary) !important; }
+.swiper-button-next, .swiper-button-prev { color: #fff !important; }
+
+/* ============ Keyframes ============ */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.animate-marquee { animation: marquee 38s linear infinite; }
+.animate-float { animation: float 5s ease-in-out infinite; }
+.skeleton-paper {
+  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklab, var(--muted) 70%, var(--border)) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-marquee, .animate-float, .skeleton-paper { animation: none !important; }
+}

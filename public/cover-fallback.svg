@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 854" width="640" height="854" role="img" aria-label="BookNook cover placeholder">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1c4b3d"/>
+      <stop offset="100%" stop-color="#0e2a22"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="854" fill="url(#g)"/>
+  <rect width="640" height="854" fill="url(#shine)"/>
+  <rect x="34" y="34" width="572" height="786" fill="none" stroke="#a97f22" stroke-opacity="0.55" stroke-width="2" rx="6"/>
+  <rect x="46" y="46" width="548" height="762" fill="none" stroke="#a97f22" stroke-opacity="0.25" stroke-width="1" rx="4"/>
+  <g fill="#a97f22" opacity="0.9">
+    <rect x="252" y="300" width="26" height="150" rx="3"/>
+    <rect x="288" y="284" width="26" height="166" rx="3" opacity="0.72"/>
+    <rect x="324" y="308" width="26" height="142" rx="3" opacity="0.5"/>
+    <rect x="366" y="296" width="26" height="154" rx="3" transform="rotate(9 379 373)"/>
+  </g>
+  <text x="320" y="540" text-anchor="middle" fill="#f4f1e7" font-family="Georgia, 'Times New Roman', serif" font-size="46" letter-spacing="1">BookNook</text>
+  <text x="320" y="586" text-anchor="middle" fill="#a97f22" font-family="Georgia, 'Times New Roman', serif" font-size="20" letter-spacing="6">THE READING ROOM</text>
+</svg>
