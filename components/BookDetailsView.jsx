@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { ArrowLeft, BookOpen, CalendarDays, UserRound } from "lucide-react";
 import Spinner from "./Spinner";
 import CoverImage from "./CoverImage";
-import { api } from "@/lib/api";
+import { shelfApi } from "@/lib/shelf-api";
 import { useSession } from "@/lib/auth-client";
 import { formatDate } from "@/lib/constants";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -26,7 +26,7 @@ export default function BookDetailsView({ id }) {
     const [busy, setBusy] = useState(false);
 
     useEffect(() => {
-        api(`/books/${id}`).then(setBook).catch((e) => setError(e.message));
+        shelfApi(`/addbooks/${id}`).then(setBook).catch((e) => setError(e.message));
     }, [id]);
 
     if (error)
@@ -45,10 +45,9 @@ export default function BookDetailsView({ id }) {
     const borrow = async () => {
         setBusy(true);
         try {
-            await api("/borrows", {
+            await shelfApi("/borrows", {
                 method: "POST",
                 body: { bookId: book._id, userEmail: session.user.email, userName: session.user.name },
-                auth: true,
             });
             toast.success("Borrowed! It's due back in 7 days.");
             setBook({ ...book, availableCopies: book.availableCopies - 1 });

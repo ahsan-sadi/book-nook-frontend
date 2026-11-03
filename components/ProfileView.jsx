@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { BookPlus, BookMarked, Layers, Library } from "lucide-react";
 import { BarChart, Bar, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import Spinner from "./Spinner";
-import { api } from "@/lib/api";
+import { shelfApi } from "@/lib/shelf-api";
 import { useSession } from "@/lib/auth-client";
 import { CATEGORIES } from "@/lib/constants";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -34,8 +34,8 @@ export default function ProfileView() {
             return;
         const email = encodeURIComponent(data.user.email);
         Promise.all([
-            api(`/books?email=${email}`),
-            api(`/borrows?email=${email}`, { auth: true }),
+            shelfApi(`/addbooks?email=${email}`),
+            shelfApi(`/borrows?email=${email}`),
         ]).then(([books, borrows]) => setStats({ books, borrows })).catch((e) => toast.error(e.message));
     }, [data]);
 

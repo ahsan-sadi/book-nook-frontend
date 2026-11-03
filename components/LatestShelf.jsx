@@ -1,21 +1,30 @@
 "use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import Reveal from "./Reveal";
 import BookCard from "./BookCard";
-import { useShelf } from "@/lib/store";
-import { sortNewest } from "@/lib/mock-data";
+import { shelfApi, sortNewest } from "@/lib/shelf-api";
 import { CATEGORIES } from "@/lib/constants";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // Home's shelf-dependent sections: newest six titles + the stats band.
-// Reads the local store so it stays in sync with adds/borrows.
+// Fetched from Express on mount so it stays in sync with adds and borrows.
 export default function LatestShelf() {
-    const shelf = useShelf();
-    const latest = sortNewest(shelf.books).slice(0, 6);
+    const [books, setBooks] = useState(null);
+
+    useEffect(() => {
+        let alive = true;
+        shelfApi("/addbooks")
+            .then((list) => alive && setBooks(list))
+            .catch(() => alive && setBooks([]));
+        return () => { alive = false; };
+    }, []);
+
+    const latest = books ? sortNewest(books).slice(0, 6) : [];
     const stats = [
-        { value: shelf.books.length || "—", label: "Titles on the shelf" },
+        { value: books ? books.length : "—", label: "Titles on the shelf" },
         { value: CATEGORIES.length, label: "Categories to browse" },
         { value: "7", label: "Day loans, no fees" },
     ];
@@ -37,7 +46,7 @@ export default function LatestShelf() {
                         </Link>
                     </div>
                 </Reveal>
-                {latest.length === 0 ? (
+                {books !== null && (latest.length === 0 ? (
                     <div className="empty-state mt-10">
                         <p className="display text-xl">The shelf is empty</p>
                         <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Be the first to put a book on it.</p>
@@ -51,7 +60,7 @@ export default function LatestShelf() {
                             </Reveal>
                         ))}
                     </div>
-                )}
+                ))}
                 <div className="mt-12 text-center sm:hidden">
                     <Link href="/books" className={cn(buttonVariants({ variant: "default" }), "rounded-full px-6")}>See all books</Link>
                 </div>

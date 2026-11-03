@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { RotateCcw, TriangleAlert, ArrowRight } from "lucide-react";
 import Spinner from "./Spinner";
 import CoverImage from "./CoverImage";
-import { api } from "@/lib/api";
+import { shelfApi } from "@/lib/shelf-api";
 import { useSession } from "@/lib/auth-client";
 import { formatDate } from "@/lib/constants";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -21,13 +21,13 @@ export default function MyBorrowsView() {
     useEffect(() => {
         if (!session)
             return;
-        api(`/borrows?email=${encodeURIComponent(session.user.email)}`, { auth: true }).then(setList).catch((e) => toast.error(e.message));
+        shelfApi(`/borrows?email=${encodeURIComponent(session.user.email)}`).then(setList).catch((e) => toast.error(e.message));
     }, [session]);
 
     const giveBack = async (id) => {
         setReturning(id);
         try {
-            await api(`/borrows/${id}`, { method: "DELETE", auth: true });
+            await shelfApi(`/borrows/${id}`, { method: "DELETE" });
             setList(list.filter((b) => b._id !== id));
             toast.success("Book returned. Thanks!");
         }

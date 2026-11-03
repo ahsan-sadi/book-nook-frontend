@@ -3,7 +3,7 @@ import BooksView from "@/components/BooksView";
 export const metadata = { title: "All Books" };
 
 // Thin server page: reads the URL and hands filters to the client view,
-// which renders the local shelf (lib/store.js).
+// which loads the shelf from the Express API (lib/shelf-api.js).
 export default async function AllBooks({ searchParams }) {
     const params = await searchParams;
     const category = typeof params?.category === "string" ? params.category : "All";

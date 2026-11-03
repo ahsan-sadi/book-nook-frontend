@@ -1,25 +1,34 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, Plus } from "lucide-react";
 import Reveal from "./Reveal";
 import BookCard from "./BookCard";
-import { useShelf } from "@/lib/store";
-import { filterBooks } from "@/lib/mock-data";
+import Spinner from "./Spinner";
+import { shelfApi, filterBooks } from "@/lib/shelf-api";
 import { CATEGORIES } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Catalogue: filters the local shelf live while typing, keeps the URL in sync
-// on submit so searches stay shareable.
+// Catalogue: loads the shelf from Express once, then filters it live while
+// typing, keeping the URL in sync on submit so searches stay shareable.
 export default function BooksView({ search = "", category = "All" }) {
     const router = useRouter();
-    const shelf = useShelf();
+    const [shelf, setShelf] = useState(null);
+    const [failed, setFailed] = useState("");
     const [term, setTerm] = useState(search);
 
-    const books = filterBooks(shelf.books, { search: term, category });
+    useEffect(() => {
+        let alive = true;
+        shelfApi("/addbooks")
+            .then((list) => alive && setShelf(list))
+            .catch((e) => alive && setFailed(e.message));
+        return () => { alive = false; };
+    }, []);
+
+    const books = shelf === null ? null : filterBooks(shelf, { search: term, category });
 
     const hrefFor = (nextCategory, nextTerm = term) => {
         const p = new URLSearchParams();
@@ -41,9 +50,13 @@ export default function BooksView({ search = "", category = "All" }) {
             <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
                 <h1 className="display text-3xl md:text-5xl">All books</h1>
                 <p className="text-sm text-muted-foreground">
-                    {books.length} {books.length === 1 ? "title" : "titles"}
-                    {category !== "All" && ` in ${category}`}
-                    {term && <> matching “{term}”</>}
+                    {books === null ? "Loading…" : (
+                        <>
+                            {books.length} {books.length === 1 ? "title" : "titles"}
+                            {category !== "All" && ` in ${category}`}
+                            {term && <> matching “{term}”</>}
+                        </>
+                    )}
                 </p>
             </div>
 
@@ -76,7 +89,16 @@ export default function BooksView({ search = "", category = "All" }) {
                 ))}
             </div>
 
-            {books.length === 0 ? (
+            {books === null ? (
+                failed ? (
+                    <div className="empty-state mt-12">
+                        <p className="display text-xl">The shelf is unavailable</p>
+                        <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{failed}</p>
+                    </div>
+                ) : (
+                    <Spinner label="Loading the shelf"/>
+                )
+            ) : books.length === 0 ? (
                 <div className="empty-state mt-12">
                     <p className="display text-xl">Nothing on the shelf matches</p>
                     <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
