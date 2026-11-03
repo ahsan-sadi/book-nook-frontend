@@ -12,8 +12,9 @@ export const metadata = {
     title: { default: "BookNook | A Small Online Library", template: "BookNook | %s" },
     description: "Add a book, borrow a book, return a book.",
 };
-// Apply the saved theme before first paint to avoid a flash (shadcn dark mode = .dark on <html>)
-const themeScript = `try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}`;
+// Apply the saved theme before first paint to avoid a flash (shadcn dark mode = .dark on <html>).
+// Also maps the legacy daisyUI value ('booknook-dark') from earlier builds onto .dark.
+const themeScript = `try{var t=localStorage.getItem('theme');if(t==='booknook-dark')t='dark';if(t==='dark'||(t==='light'?false:(!t&&matchMedia('(prefers-color-scheme: dark)').matches)))document.documentElement.classList.add('dark')}catch(e){}`;
 
 export default function RootLayout({ children }) {
     return (<html lang="en" suppressHydrationWarning className={cn(display.variable, sans.variable, "font-sans")}>

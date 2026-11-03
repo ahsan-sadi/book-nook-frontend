@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import BookForm from "./BookForm";
 import Spinner from "./Spinner";
-import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 
 export default function AddBookView() {
@@ -22,12 +21,8 @@ export default function AddBookView() {
                     <BookForm
                         user={{ name: data.user.name, email: data.user.email }}
                         submitLabel="Add to the shelf"
-                        onSubmit={async (v) => {
-                            await api("/books", {
-                                method: "POST",
-                                body: { ...v, addedByName: data.user.name, addedByEmail: data.user.email },
-                                auth: true,
-                            });
+                        onSubmit={async () => {
+                            // BookForm already persisted to Mongo — just confirm and move on.
                             toast.success("Book added to the shelf.");
                             router.push("/my-books");
                         }}

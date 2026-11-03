@@ -3,40 +3,30 @@
 A small online library: add a book, borrow a book, return a book.
 
 **Live site:** ADD_LIVE_URL_HERE
-**Server repo:** `../booknook-server` (Express + MongoDB API)
 
 ## Features
-- Email/password and Google sign-in with BetterAuth and the MongoDB adapter
-- Swiper.js hero slider and a New Arrivals section showing the 6 newest books
-- Add, edit and delete your own books, with covers uploaded to imgbb
-- Borrow for 7 days, track available copies, and block double borrowing
-- Light and dark themes, plus responsive layouts from phone to desktop
-- Private routes stay signed in on reload, with a custom 404 and toast messages throughout
+- Email/password sign-in with BetterAuth + MongoDB (Google sign-in ready once credentials are added)
+- Standless demo shelf: 16 seed titles render on the server and every add/edit/borrow/return persists in `localStorage`
+- Swiper.js hero slider, live-filtering catalogue, and a New Arrivals section
+- Borrow for 7 days, track available copies, block double borrows — all in the browser
+- Light/dark themes (shadcn `.dark` class), responsive layouts, custom 404, toast messages
 
 ## Stack
-Next.js (App Router), JavaScript, Tailwind CSS v4 + daisyUI + shadcn/ui, BetterAuth (JWT plugin), MongoDB, Swiper, react-hot-toast, Express (separate app)
+Next.js 15 (App Router, JavaScript), Tailwind CSS v4 + shadcn/ui (base-ui), BetterAuth
+(JWT plugin, MongoDB adapter), Swiper, framer-motion, recharts, lucide-react,
+react-hot-toast. Books/borrows live in `lib/store.js` + `lib/mock-data.js` — no API
+server is required. `../booknook-server` (Express) is optional and decoupled.
 
 ## Run locally
 
-This app is pinned to **port 3001** (`npm run dev` passes `-p 3001`). Every URL that
-must agree — `BETTER_AUTH_URL` here and `CLIENT_URL` in the server — uses
-`http://localhost:3001`. If you change the port, change all of them.
+Pinned to **port 3000** (`npm run dev` passes `-p 3000`). `BETTER_AUTH_URL` here and
+`CLIENT_URL` in the server must both be `http://localhost:3000`.
 
 ```bash
-# 1. Client (this repo)
-cp .env.example .env   # fill in DB_URL, NEXT_PUBLIC_IMGBB_KEY, Google secrets
+cp .env.example .env   # fill in MONGODB_URI + Google secrets
 npm install
-npm run dev            # http://localhost:3001
-
-# 2. API (../booknook-server)
-cd ../booknook-server
-cp .env.example .env   # MONGODB_URI must point at the same database
-npm install
-npm run dev            # http://localhost:5000
+npm run dev            # http://localhost:3000
 ```
 
-The client reads the API URL from `NEXT_PUBLIC_API_URL` (default `http://localhost:5000`).
-
-Google sign-in: add `http://localhost:3001/api/auth/callback/google` as an authorized
+Google sign-in: add `http://localhost:3000/api/auth/callback/google` as an authorized
 redirect URI in Google Cloud and put the client ID/secret in the client `.env`.
-# book-nook-frontend

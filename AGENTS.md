@@ -1,31 +1,29 @@
 # AGENTS.md
 
-Next.js 15 (App Router) front end for BookNook, plain JavaScript (no TS, `jsconfig.json` maps `@/*` to the repo root). The book/borrow data API is the **separate Express app in `../booknook-server`** — this repo only owns auth, UI, and the Next API route for BetterAuth.
+Next.js 15 (App Router) front end for BookNook, plain JavaScript (no TS, `jsconfig.json` maps `@/*` to the repo root).
 
 ## Commands
 
-- `npm run dev` — dev server (defaults to port 3000; see auth gotcha below about 3001)
+- `npm run dev` — dev server, **pinned to port 3000** (`-p 3000`)
 - `npm run build` — the only real verification step
-- **No tests and no typecheck exist.** `npm run lint` (`next lint`) has no ESLint installed and no config, so it prompts interactively — don't rely on it
-- **`npm run build` currently fails on a clean checkout**: `app/globals.css` loads daisyui via `@plugin`, but daisyui is not in `package.json`/`node_modules`. Run `npm i daisyui` first
+- **No tests and no typecheck exist.** `npm run lint` (`next lint`) has no ESLint config installed, so it prompts interactively — don't rely on it
+- **Never run `npm run build` while `npm run dev` is running**: both use `.next`, and the build wipes dev's `server/vendor-chunks`, leaving the dev server serving 500s (`ENOENT ... vendor-chunks`). Stop dev, build, then restart dev (a stale `.next` can be deleted safely)
 
 ## Architecture
 
-- Pages in `app/**/page.jsx` are thin server components; interactive UI lives in `components/*View.jsx` (client components). New feature logic goes in the View, not the page
-- Data fetching (`lib/api.js`):
-  - `api(path, { auth: true })` — client-side calls to `NEXT_PUBLIC_API_URL` (the Express server) with a Bearer token
-  - `publicBooks(query)` — server-side fetch of public data; **silently returns `[]` on any error**, so a broken API looks like an empty shelf, not a crash
-- Auth: BetterAuth + MongoDB adapter. Server config in `lib/auth.js` (served by `app/api/auth/[...all]/route.js`), browser client in `lib/auth-client.js`. Route protection is `middleware.js`, which only checks for the session cookie against a **hardcoded matcher list** — new private pages must be added there
-- UI stack is three systems mixed: Tailwind v4 (CSS-first config in `app/globals.css`, no `tailwind.config`), daisyUI classes (`btn`, `card`, `badge`...) with custom `booknook`/`booknook-dark` themes, and shadcn/ui components in `components/ui` (`components.json` has `tsx: false`, so `npx shadcn add <component>` generates `.jsx`)
-- Book cover uploads go directly to imgbb from the browser (`lib/imgbb.js`); `next.config.mjs` allows all remote https images for this
+- **Data is local**: books/borrows come from `lib/store.js` (in-memory + `localStorage`, seeded by `lib/mock-data.js`, SSR-safe via `useSyncExternalStore`). `lib/api.js` is a shim with the old REST call shape (`api("/books?email=…", { auth: true })`) that routes into the store — there is **no Express dependency**. `../booknook-server` exists but is optional/decoupled.
+- Pages in `app/**/page.jsx` are thin (often server) components; interactive UI lives in `components/*View.jsx` (client components).
+- Auth is BetterAuth entirely inside this app: server config in `lib/auth.js` (served by `app/api/auth/[...all]/route.js`), browser client in `lib/auth-client.js` (single client, exports `signIn/signUp/signOut/useSession/authClient`). The `jwt()` / `jwtClient()` plugins serve `/api/auth/jwks` + `GET /token` for the optional Express API. Route protection is `middleware.js` (session-cookie check on a hardcoded matcher list) — new private pages must be added there.
+- UI is **Tailwind v4 + shadcn/ui** (`components/ui/*.jsx`, base-ui primitives, `components.json` has `tsx: false`). daisyUI was removed; design tokens are `:root` / `.dark` vars in `app/globals.css` plus custom classes `.eyebrow`, `.display`, `.chip`, `.lift`, `.grain`, `.empty-state`, `.skeleton-paper`, `.container-page`.
+- Book covers are resized to a JPEG data URL in the browser (`lib/covers.js`) — no upload service or API key.
 
-## Verified gotchas (as of this writing)
+## Env vars (client `.env`)
 
-- `components/Navbar.jsx` imports `signOut` from `lib/auth-client.js`, which doesn't export it — build emits an import warning
-- `lib/auth-client.js` creates **two** clients: `authClient` with a hardcoded `baseURL: "http://localhost:3001"` (used only by `api.js` for tokens), and a second same-origin client that provides `signIn`/`signUp`/`useSession`. `.env` sets `BETTER_AUTH_URL=http://localhost:3001` while `npm run dev` serves 3000 — keep the port and URL consistent or token calls hit the wrong origin
-- `api(path, { auth: true })` calls `authClient.token()`, which requires the BetterAuth JWT plugin registered on both sides (`jwt()` in `lib/auth.js`, `jwtClient()` in `lib/auth-client.js`). Neither is currently registered
-- The UI signs in with `provider: "google"`, but `lib/auth.js` only configures BetterAuth's **github** social provider
-- Dark mode is the daisyUI `data-theme` attribute on `<html>` (`booknook` / `booknook-dark`), persisted in `localStorage.theme` and applied pre-paint by an inline script in `app/layout.jsx`. Don't toggle the `.dark` class for daisyUI components
-- `lib/mongodb.js` (reads `MONGODB_URI`/`DB_NAME`) is not imported anywhere; `lib/auth.js` opens its own client from `DB_URL`
-- Env vars the code reads: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_IMGBB_KEY`, `DB_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` (`MONGODB_URI`/`DB_NAME` only for the unused `lib/mongodb.js`). There is no `.env.example` here despite the README — the one in `../booknook-server` is a different app
-- `D:\booknook\` (parent) has an empty `package.json` + its own lockfile, so Next warns it inferred the wrong workspace root during build. Harmless; silence with `outputFileTracingRoot` in `next.config.mjs` if it bothers you
+`BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (= `http://localhost:3000`), `MONGODB_URI` (BetterAuth collections in the `booknook` DB), `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (empty ⇒ startup warning, Google sign-in disabled). There is no `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_IMGBB_KEY` anymore.
+
+## Gotchas
+
+- BetterAuth `minPasswordLength: 6` matches `RegisterForm`'s client validation; `autoSignIn: false` because the form redirects to `/login` after signup.
+- BetterAuth rejects browser POSTs whose `Origin` doesn't match `BETTER_AUTH_URL` (403) — scripts must send `Origin: http://localhost:3000`.
+- Dark mode = `.dark` class on `<html>` (shadcn tokens), persisted as `localStorage.theme` = `dark`/`light`, applied pre-paint by the inline script in `app/layout.jsx` (it also maps the legacy `booknook-dark` value). Do not look for daisyUI `data-theme`.
+- Port 3000 is intentionally hard-coded across `package.json`, `.env`, `.env.example`, and the server's `.env` (`CLIENT_URL`); change all of them together.
