@@ -29,7 +29,6 @@ export default function RegisterForm() {
     const f = new FormData(e.currentTarget);
     let user = Object.fromEntries(f.entries());
 
-    console.log("REgister", user);
     const problem = validatePassword(String(f.get("password")));
 
     const { data, err } = await authClient.signUp.email({

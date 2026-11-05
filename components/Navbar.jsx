@@ -8,6 +8,7 @@ import {
   Moon,
   Sun,
   LogOut,
+  Menu,
   UserRound,
   Library,
   BookPlus,
@@ -20,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -62,6 +64,11 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Any navigation (including the logo inside the drawer) dismisses the menu.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
   const toggleTheme = () => {
     const next = !dark;
     document.documentElement.classList.toggle("dark", next);
@@ -85,12 +92,15 @@ export default function Navbar() {
   // Active link gets an editorial underline instead of a filled pill
   const linkClass = (href) =>
     `relative px-3 py-2 text-sm font-medium transition-colors hover:text-secondary ${pathname === href ? "text-secondary" : "text-foreground/80"}`;
+  // Drawer rows use a filled background instead of the underline.
+  const sheetLinkClass = (active) =>
+    `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${active ? "bg-secondary/15 text-secondary" : "text-foreground/80 hover:bg-muted"}`;
 
   return (
     <header
       className={`sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl transition-shadow ${scrolled ? "shadow-[0_16px_40px_-32px_rgb(0_0_0/0.45)]" : ""}`}
     >
-      <nav className="container-page flex h-16 items-center justify-between gap-4">
+      <nav className="container-page flex h-16 items-center justify-between gap-2 sm:gap-4">
         <div className="flex items-center gap-2">
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger
@@ -98,35 +108,51 @@ export default function Navbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="lg:hidden"
+                  className="size-10 lg:hidden"
                   aria-label="Open menu"
                 />
               }
             >
+              <Menu size={20} />
               <span className="sr-only">Menu</span>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 gap-0 p-0">
-              <SheetHeader className="border-b border-border">
+              <SheetHeader className="shrink-0 border-b border-border">
                 <SheetTitle className="text-left">
                   <Logo />
                 </SheetTitle>
+                <SheetDescription className="sr-only">
+                  Site navigation
+                </SheetDescription>
               </SheetHeader>
-              <ul className="flex flex-col gap-1 p-3">
+              <ul className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3">
                 {links.map((l) => (
                   <li key={l.href}>
                     <Link
                       href={l.href}
                       onClick={() => setMenuOpen(false)}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${pathname === l.href ? "bg-secondary/15 text-secondary" : "text-foreground/80 hover:bg-muted"}`}
+                      className={sheetLinkClass(pathname === l.href)}
                     >
                       {l.icon ? <l.icon size={16} /> : null}
                       {l.label}
                     </Link>
                   </li>
                 ))}
+                {user && (
+                  <li className="mt-1 border-t border-border pt-1">
+                    <Link
+                      href="/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className={sheetLinkClass(pathname === "/profile")}
+                    >
+                      <UserRound size={16} />
+                      My Profile
+                    </Link>
+                  </li>
+                )}
               </ul>
               {!user && (
-                <div className="flex flex-col gap-2 border-t border-border p-3">
+                <div className="flex shrink-0 flex-col gap-2 border-t border-border p-3">
                   <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}
@@ -143,6 +169,38 @@ export default function Navbar() {
                   </Link>
                 </div>
               )}
+              {user && (
+                <div className="shrink-0 border-t border-border p-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start gap-2 text-destructive hover:text-destructive"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    <LogOut size={15} />
+                    Sign out
+                  </Button>
+                </div>
+              )}
+              {/* Theme switch lives at the bottom of the drawer */}
+              <div className="mt-auto flex shrink-0 items-center justify-between gap-2 border-t border-border p-3">
+                <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                  Theme
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={toggleTheme}
+                  aria-label="Toggle theme"
+                >
+                  {dark ? <Sun size={14} /> : <Moon size={14} />}
+                  {dark ? "Light" : "Dark"}
+                </Button>
+              </div>
             </SheetContent>
           </Sheet>
           <Logo />
@@ -219,7 +277,9 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
+            // Signed-out CTAs live in the drawer on phones, so they only
+            // appear once there's room for them in the bar itself.
+            <div className="hidden items-center gap-2 sm:flex">
               <Link
                 href="/login"
                 className={buttonVariants({ variant: "ghost", size: "sm" })}
