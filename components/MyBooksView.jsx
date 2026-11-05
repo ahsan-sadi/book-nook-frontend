@@ -28,11 +28,12 @@ export default function MyBooksView() {
   const [deleting, setDeleting] = useState(null);
   const [busy, setBusy] = useState(false);
 
-  // Read the shelf once per mount — never during render, or every setBooks
-  // re-triggers the fetch and loops.
+  // Read the owner's shelf once per mount — never during render, or every setBooks
+  // re-triggers the fetch and loops. `?email=` now requires a JWT for that same
+  // reader, and only their books come back (they're the only ones editable).
   const load = useCallback(() => {
     if (!session) return;
-    shelfApi("/addbooks")
+    shelfApi(`/addbooks?email=${encodeURIComponent(session.user.email)}`)
       .then(setBooks)
       .catch((e) => toast.error(e.message));
   }, [session]);

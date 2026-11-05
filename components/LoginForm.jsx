@@ -28,7 +28,7 @@ export default function LoginForm() {
       password: user.password,
     });
     if (data) {
-      redirect("/login");
+      redirect("/");
     }
     if (err) {
       console.log(err);
