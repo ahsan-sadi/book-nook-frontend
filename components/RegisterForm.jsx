@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
@@ -21,39 +20,43 @@ function validatePassword(p) {
 }
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const handle = async (e) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    let user = Object.fromEntries(f.entries());
+    const user = Object.fromEntries(f.entries());
 
-    const problem = validatePassword(String(f.get("password")));
-
-    const { data, err } = await authClient.signUp.email({
-      email: user.email,
-      password: user.password,
-      name: user.name,
-      image: user.image,
-    });
-    if (data) {
-      redirect("/login");
-    }
-    if (err) {
-      console.log(err);
-    }
-
+    // Check the password before bothering the server — better-auth only
+    // enforces its own min length, the rest is this form's contract.
+    const problem = validatePassword(String(f.get("password") || ""));
     if (problem) {
       setError(problem);
       toast.error(problem);
       return;
     }
+
     setBusy(true);
     setError("");
+    const { data, error: err } = await authClient.signUp.email({
+      email: user.email,
+      password: user.password,
+      name: user.name,
+      image: user.image,
+    });
 
+    if (err || !data) {
+      setBusy(false);
+      const message = err?.message || "Couldn't create your account.";
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    // autoSignIn is off in lib/auth.js, so there is no session yet — hand the
+    // reader to a freshly loaded login page instead of a half-stale one.
     toast.success("Account created. Log in to continue.");
-    router.push("/login");
+    window.location.assign("/login");
   };
   return (
     <AuthShell

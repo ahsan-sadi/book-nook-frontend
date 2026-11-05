@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { FcGoogle } from "react-icons/fc";
@@ -14,39 +14,37 @@ import { Spinner as SpinnerIcon } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 
 export default function LoginForm() {
-  const router = useRouter();
-  const redirect = useSearchParams().get("redirect") || "/";
+  // Where to land after signing in — "/" (home) unless middleware sent the
+  // reader here from a private page (?redirect=/books/123).
+  const next = useSearchParams().get("redirect") || "/";
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const handle = async (e) => {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    let user = Object.fromEntries(f.entries());
+    setBusy(true);
+    setError("");
+    const user = Object.fromEntries(new FormData(e.currentTarget).entries());
 
-    const { data, err } = await authClient.signIn.email({
+    const { data, error: err } = await authClient.signIn.email({
       email: user.email,
       password: user.password,
     });
-    if (data) {
-      redirect("/");
-    }
-    if (err) {
-      console.log(err);
-    }
 
-    setBusy(true);
-    setError("");
-    if (error) {
-      setError(error.message || "Email or password is incorrect.");
+    if (err || !data) {
+      setBusy(false);
+      const message = err?.message || "Email or password is incorrect.";
+      setError(message);
       toast.error("Couldn't sign you in.");
       return;
     }
+
     toast.success("Welcome back!");
-    router.push(redirect);
-    router.refresh();
+    // Full document load rather than a client-side push: the home page — and
+    // everything keyed off the fresh session (navbar, theme) — starts over.
+    window.location.assign(next);
   };
   const google = () =>
-    signIn.social({ provider: "google", callbackURL: redirect });
+    signIn.social({ provider: "google", callbackURL: next });
   return (
     <AuthShell
       title="Welcome back"
